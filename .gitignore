@@ -1,0 +1,21 @@
+*.log
+tmp/
+temp/
+
+# --- COMPILADOS E TEMPORÁRIOS DO DELPHI ---
+**/__history/
+**/__recovery/
+*.~*
+*.dcu
+*.exe
+*.dres
+*.identcache
+*.stat
+*.local
+*.deploymaps
+*.o
+*.obj
+**/Win32/
+**/Win64/
+**/Debug/
+**/Release/
