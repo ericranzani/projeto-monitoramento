@@ -1,0 +1,33 @@
+:host {
+  display: block;
+  background-color: #f4f7f6;
+  min-height: 100vh;
+}
+
+.card-ativo {
+  transition: transform 0.2s, box-shadow 0.2s;
+  background: white;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+  }
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  
+  &::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+}
+
+.status-online::before { background-color: #2ecc71; box-shadow: 0 0 5px #2ecc71; }
+.status-alerta::before { background-color: #e67e22; }
+.status-offline::before { background-color: #e74c3c; }
