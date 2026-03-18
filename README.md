@@ -41,7 +41,7 @@ Como este é um projeto em desenvolvimento contínuo, as próximas etapas são:
 
 
 ```bash
-API: uvicorn main:app --reload na pasta /venv.
+API: uvicorn main:app --reload na pasta /api-python.
 
 Web: ng serve na pasta /dashboard-ativos.
 
