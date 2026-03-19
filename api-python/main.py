@@ -1,8 +1,13 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, HTTPException
+from sqlalchemy.orm import Session
+from database import engine, get_db
+import models
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from datetime import datetime
 from typing import List
+
+models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
@@ -14,25 +19,15 @@ app.add_middleware(
     allow_methods=["*"],  
     allow_headers=["*"],  
 )
-
-# Modelo de dados que Delphi e Angular devem seguir
-class Ativo(BaseModel):
+class AtivoSchema(BaseModel):
     id: int
     nome_ativo: str
     status: str
     carga_cpu: int
     ultima_atualizacao: datetime
 
-# DB mocado para armazenar os ativos
-db_ativos = [
-    {
-        "id": 1,
-        "nome_ativo": "Servidor A",
-        "status": "Online",
-        "carga_cpu": 45,
-        "ultima_atualizacao": datetime.now()
-    }
-]
+    class Config:
+        from_attributes = True
 
 # --- ROTAS (ENDPOINTS) ---
 
@@ -41,13 +36,15 @@ def home():
     return {"message": "API de Monitoramento Online!"}
 
 # Rota que o Angular vai consumir para obter a lista de ativos
-@app.get("/ativos", response_model=List[Ativo])
-def listar_ativos():
-    return db_ativos
+@app.get("/ativos", response_model=List[AtivoSchema])
+def listar_ativos(db: Session = Depends(get_db)):
+    return db.query(models.AtivoModel).all()
 
 # Rota que o Delphi vai alimentar os dados dos ativos
 @app.post("/ativos")    
-def atualizar_ativo(ativo: Ativo):
-    # Simular a atualização ou inserção no DB
-    db_ativos.append(ativo.model_dump())
-    return {"status": "sucesso", "item_recebido": ativo.nome_ativo}
+def criar_ativo(ativo: AtivoSchema, db: Session = Depends(get_db)):
+    db_ativo = models.AtivoModel(**ativo.model_dump())
+    db.add(db_ativo)
+    db.commit()
+    db.refresh(db_ativo)
+    return db_ativo
