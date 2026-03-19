@@ -5,7 +5,7 @@ import models
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -15,12 +15,11 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  
-    allow_credentials=True,
     allow_methods=["*"],  
     allow_headers=["*"],  
 )
 class AtivoSchema(BaseModel):
-    id: int
+    id: Optional[int] = None
     nome_ativo: str
     status: str
     carga_cpu: int
@@ -41,9 +40,10 @@ def listar_ativos(db: Session = Depends(get_db)):
     return db.query(models.AtivoModel).all()
 
 # Rota que o Delphi vai alimentar os dados dos ativos
-@app.post("/ativos")    
+@app.post("/ativos", response_model=AtivoSchema)    
 def criar_ativo(ativo: AtivoSchema, db: Session = Depends(get_db)):
-    db_ativo = models.AtivoModel(**ativo.model_dump())
+    dados = ativo.model_dump(exclude={"id"})
+    db_ativo = models.AtivoModel(**dados)
     db.add(db_ativo)
     db.commit()
     db.refresh(db_ativo)
