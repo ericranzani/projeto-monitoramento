@@ -1,6 +1,17 @@
 <div style="padding: 30px; font-family: 'Segoe UI', system-ui, sans-serif;">
   <div style="display: flex; justify-content: space-between; align-items: center;">
     <h1 style="color: #2c3e50;">Painel de Controle de Ativos</h1>
+    @if (mostrarNotificacao()) {
+      <div class="toast-notification">
+        <div class="toast-content">
+          <span class="icon">⚠️</span>
+          <span class="message">
+            <strong>Atenção:</strong> {{ ativosCriticos().length }} servidor(es) crítico(s)!
+          </span>
+          <button class="btn-close" (click)="fecharNotificacao()">×</button>
+        </div>
+      </div>
+    }
     <button (click)="carregarDados()" 
             style="background: #4CAF50; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold;">
       🔄 Sincronizar Agora
@@ -9,15 +20,18 @@
 
   <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
 
+ 
+
   <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
     
     @for (ativo of listaAtivos(); track ativo.id) {
       <div style="background: white; border: 1px solid #e0e0e0; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
           <h2 style="margin: 0; font-size: 1.2rem; color: #34495e;">{{ ativo.nome_ativo }}</h2>
-          <span [style.background]="ativo.status === 'Online' ? '#d4edda' : '#f8d7da'"
-                [style.color]="ativo.status === 'Online' ? '#155724' : '#721c24'"
-                style="padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold;">
+          <span class="status-badge" 
+                [ngClass]="{'status-online': ativo.status === 'Online', 
+                            'status-alerta': ativo.status === 'Alerta',
+                            'status-offline': ativo.status === 'Offline'}">
             {{ ativo.status }}
           </span>
         </div>
@@ -42,6 +56,8 @@
     } @empty {
       <p>Nenhum dado recebido do Python ainda...</p>
     }
+
+   
 
   </div>
 </div>

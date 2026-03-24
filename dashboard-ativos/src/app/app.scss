@@ -17,17 +17,91 @@
 .status-badge {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  
+  gap: 8px;
+  font-weight: bold;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+
   &::before {
     content: '';
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
     display: inline-block;
   }
 }
 
-.status-online::before { background-color: #2ecc71; box-shadow: 0 0 5px #2ecc71; }
-.status-alerta::before { background-color: #e67e22; }
-.status-offline::before { background-color: #e74c3c; }
+.toast-notification {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%); // Centraliza horizontalmente
+  z-index: 1000; // Garante que fique acima de tudo
+  min-width: 300px;
+  
+  // Animação de entrada suave
+  animation: slideIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  .toast-content {
+    background-color: #e74c3c;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 50px; // Estilo "pílula"
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding-right: 10px;
+
+  .btn-close {
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0 5px;
+      margin-left: 10px;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+}
+
+.status-online {
+  background-color: #d4edda;
+  color: #155724;
+  &::before { 
+    background-color: #2ecc71; 
+    animation: pulse 2s infinite; 
+  }
+}
+.status-alerta { 
+  background-color: #ff9966; 
+  color: #A84300;
+  &::before { background-color: #D35400; }
+}
+.status-offline {
+  background-color: #f8d7da;
+  color: #721c24;
+  &::before { background-color: #e74c3c; }
+}
+
+// Animação para a notificação "descer" do topo
+@keyframes slideIn {
+  from {
+    top: -50px;
+    opacity: 0;
+  }
+  to {
+    top: 20px;
+    opacity: 1;
+  }
+}
+
