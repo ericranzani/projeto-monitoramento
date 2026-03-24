@@ -1,4 +1,4 @@
-import { Component, signal, OnInit, inject } from '@angular/core';
+import { Component, signal, OnInit, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AtivoService, Ativo } from './services/ativo';
 //import { RouterOutlet } from '@angular/router';
@@ -10,13 +10,25 @@ import { AtivoService, Ativo } from './services/ativo';
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
-export class App implements OnInit {
+export class App implements OnInit, OnDestroy {
   private services = inject(AtivoService);
-
   public listaAtivos = signal<Ativo[]>([]);
+  private intervalId: any;
+
 
   ngOnInit(): void {
     this.carregarDados();
+    // Atualiza os dados a cada 5 segundos
+    this.intervalId = setInterval(() => {
+      this.carregarDados();
+    }, 5000);
+  }
+
+  // Limpa o intervalo quando o componente for destruído
+  ngOnDestroy(): void {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+    }
   }
 
   carregarDados() {

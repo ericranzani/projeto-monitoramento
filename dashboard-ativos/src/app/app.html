@@ -15,9 +15,10 @@
       <div style="background: white; border: 1px solid #e0e0e0; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
           <h2 style="margin: 0; font-size: 1.2rem; color: #34495e;">{{ ativo.nome_ativo }}</h2>
-          <span [style.background]="ativo.status === 'Online' ? '#d4edda' : '#f8d7da'"
-                [style.color]="ativo.status === 'Online' ? '#155724' : '#721c24'"
-                style="padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold;">
+          <span class="status-badge" 
+                [ngClass]="{'status-online': ativo.status === 'Online', 
+                            'status-alerta': ativo.status === 'Alerta',
+                            'status-offline': ativo.status === 'Offline'}">
             {{ ativo.status }}
           </span>
         </div>
