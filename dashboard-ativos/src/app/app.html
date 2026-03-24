@@ -1,6 +1,17 @@
 <div style="padding: 30px; font-family: 'Segoe UI', system-ui, sans-serif;">
   <div style="display: flex; justify-content: space-between; align-items: center;">
     <h1 style="color: #2c3e50;">Painel de Controle de Ativos</h1>
+    @if (mostrarNotificacao()) {
+      <div class="toast-notification">
+        <div class="toast-content">
+          <span class="icon">⚠️</span>
+          <span class="message">
+            <strong>Atenção:</strong> {{ ativosCriticos().length }} servidor(es) crítico(s)!
+          </span>
+          <button class="btn-close" (click)="fecharNotificacao()">×</button>
+        </div>
+      </div>
+    }
     <button (click)="carregarDados()" 
             style="background: #4CAF50; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold;">
       🔄 Sincronizar Agora
@@ -8,6 +19,8 @@
   </div>
 
   <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+
+ 
 
   <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
     
@@ -43,6 +56,8 @@
     } @empty {
       <p>Nenhum dado recebido do Python ainda...</p>
     }
+
+   
 
   </div>
 </div>

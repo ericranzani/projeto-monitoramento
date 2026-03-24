@@ -32,11 +32,46 @@
   }
 }
 
-/* Animação de Pulsação */
-@keyframes pulse {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
-  70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(46, 204, 113, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
+.toast-notification {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%); // Centraliza horizontalmente
+  z-index: 1000; // Garante que fique acima de tudo
+  min-width: 300px;
+  
+  // Animação de entrada suave
+  animation: slideIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  .toast-content {
+    background-color: #e74c3c;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 50px; // Estilo "pílula"
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding-right: 10px;
+
+  .btn-close {
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0 5px;
+      margin-left: 10px;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
 }
 
 .status-online {
@@ -57,3 +92,16 @@
   color: #721c24;
   &::before { background-color: #e74c3c; }
 }
+
+// Animação para a notificação "descer" do topo
+@keyframes slideIn {
+  from {
+    top: -50px;
+    opacity: 0;
+  }
+  to {
+    top: 20px;
+    opacity: 1;
+  }
+}
+
