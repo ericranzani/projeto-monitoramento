@@ -74,6 +74,27 @@
   }
 }
 
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-delete {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  opacity: 0.5;
+  transition: transform 0.2s, opacity 0.2s;
+
+  &:hover {
+    opacity: 1;
+    transform: scale(1.2);
+    color: #e74c3c;
+  }
+}
+
 .status-online {
   background-color: #d4edda;
   color: #155724;

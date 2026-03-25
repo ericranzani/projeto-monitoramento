@@ -72,4 +72,15 @@ export class App implements OnInit, OnDestroy {
       error: (err) => console.error('Erro ao carregar ativos:', err)
     });
   }
+
+  deletarAtivo(id: number) {
+  if (confirm('Tem certeza que deseja excluir este ativo?')) {
+      this.services.deletarAtivo(id).subscribe({
+        next: () => {
+          this.carregarDados();
+        },
+        error: (err) => console.error('Erro ao deletar:', err)
+      });
+    }
+  }
 }
