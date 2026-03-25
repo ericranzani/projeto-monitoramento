@@ -35,6 +35,10 @@
             {{ ativo.status }}
           </span>
         </div>
+        <div class="card-header">
+          <h2>{{ ativo.nome_ativo }}</h2>
+          <button class="btn-delete" (click)="deletarAtivo(ativo.id)">🗑️</button>
+        </div>
 
         <div style="margin: 20px 0;">
           <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.9rem;">

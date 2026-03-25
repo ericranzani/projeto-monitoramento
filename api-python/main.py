@@ -48,3 +48,14 @@ def criar_ativo(ativo: AtivoSchema, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_ativo)
     return db_ativo
+
+@app.delete("/ativos/{ativo_id}")
+def deletar_ativo(ativo_id: int, db: Session = Depends(get_db)):
+    db_ativo = db.query(models.AtivoModel).filter(models.AtivoModel.id == ativo_id).first()
+    
+    if not db_ativo:
+        raise HTTPException(status_code=404, detail="Ativo não encontrado")
+        
+    db.delete(db_ativo)
+    db.commit()
+    return {"message": f"Ativo {ativo_id} removido com sucesso"}

@@ -20,4 +20,9 @@ export class AtivoService {
   listarAtivos(): Observable<Ativo[]> {
     return this.http.get<Ativo[]>(this.apiUrl);
   }
+
+  deletarAtivo(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}`);
+  }
 }
+
