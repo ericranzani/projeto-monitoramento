@@ -1,67 +1,75 @@
-<div style="padding: 30px; font-family: 'Segoe UI', system-ui, sans-serif;">
-  <div style="display: flex; justify-content: space-between; align-items: center;">
-    <h1 style="color: #2c3e50;">Painel de Controle de Ativos</h1>
-    @if (mostrarNotificacao()) {
-      <div class="toast-notification">
-        <div class="toast-content">
-          <span class="icon">⚠️</span>
-          <span class="message">
-            <strong>Atenção:</strong> {{ ativosCriticos().length }} servidor(es) crítico(s)!
-          </span>
-          <button class="btn-close" (click)="fecharNotificacao()">×</button>
-        </div>
-      </div>
-    }
-    <button (click)="carregarDados()" 
-            style="background: #4CAF50; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold;">
-      🔄 Sincronizar Agora
-    </button>
-  </div>
-
-  <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
-
- 
-
-  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+<div class="main-container">
+  
+  <header class="main-header">
+    <h1>Painel de Controle de Ativos</h1>
     
-    @for (ativo of listaAtivos(); track ativo.id) {
-      <div style="background: white; border: 1px solid #e0e0e0; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-          <h2 style="margin: 0; font-size: 1.2rem; color: #34495e;">{{ ativo.nome_ativo }}</h2>
-          <span class="status-badge" 
-                [ngClass]="{'status-online': ativo.status === 'Online', 
-                            'status-alerta': ativo.status === 'Alerta',
-                            'status-offline': ativo.status === 'Offline'}">
-            {{ ativo.status }}
-          </span>
+    <div class="header-actions">
+      @if (mostrarNotificacao()) {
+        <div class="toast-notification">
+          <div class="toast-content">
+            <span class="icon">⚠️</span>
+            <span class="message">
+              <strong>Atenção:</strong> {{ ativosCriticos().length }} crítico(s)!
+            </span>
+            <button class="btn-close" (click)="fecharNotificacao()">×</button>
+          </div>
         </div>
+      }
+
+      <button class="btn-refresh" (click)="carregarDados()">
+        🔄 Sincronizar Agora
+      </button>
+    </div>
+  </header>
+
+  <hr class="separator">
+
+  <section class="chart-section">
+    <div class="chart-container">
+      <canvas #cpuChart></canvas>
+    </div>
+  </section>
+
+  <div class="grid-cards">
+    @for (ativo of listaAtivos(); track ativo.id) {
+      <div class="card-ativo">
+        
         <div class="card-header">
           <h2>{{ ativo.nome_ativo }}</h2>
-          <button class="btn-delete" (click)="deletarAtivo(ativo.id)">🗑️</button>
+          <div class="header-right">
+            <span class="status-badge" 
+                  [ngClass]="{
+                    'status-online': ativo.status === 'Online', 
+                    'status-alerta': ativo.status === 'Alerta',
+                    'status-offline': ativo.status === 'Offline'
+                  }">
+              {{ ativo.status }}
+            </span>
+            <button class="btn-delete" (click)="deletarAtivo(ativo.id)" title="Excluir">🗑️</button>
+          </div>
         </div>
 
-        <div style="margin: 20px 0;">
-          <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.9rem;">
+        <div class="card-body">
+          <div class="cpu-info">
             <span>Carga da CPU</span>
             <strong>{{ ativo.carga_cpu }}%</strong>
           </div>
-          <div style="background: #f0f0f0; border-radius: 10px; height: 8px; overflow: hidden;">
-            <div [style.width.%]="ativo.carga_cpu"
-                 [style.background]="ativo.carga_cpu > 80 ? '#e74c3c' : '#2ecc71'"
-                 style="height: 100%; transition: width 0.3s ease-in-out;">
+          
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill"
+                 [style.width.%]="ativo.carga_cpu"
+                 [style.background]="ativo.carga_cpu > 80 ? '#e74c3c' : '#2ecc71'">
             </div>
           </div>
         </div>
 
-        <div style="color: #95a5a6; font-size: 0.8rem; border-top: 1px solid #f9f9f9; padding-top: 10px;">
+        <footer class="card-footer">
           Última atualização: {{ ativo.ultima_atualizacao | date:'dd/MM/yyyy HH:mm:ss' }}
-        </div>
+        </footer>
+
       </div>
     } @empty {
-      <p>Nenhum dado recebido do Python ainda...</p>
-    }
-
-   
-
+      <p class="empty-message">Nenhum dado recebido do Python ainda...</p>
+    } 
   </div>
 </div>
