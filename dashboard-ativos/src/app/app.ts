@@ -108,7 +108,17 @@ export class App implements OnInit, OnDestroy {
  
   carregarDados() {
     this.services.listarAtivos().subscribe({
-      next: (dados) => this.listaAtivos.set(dados),
+      next: (dadosNovos) => {
+        // Converte ambos para string para uma comparação rápida e simples
+        const dadosAtuaisStr = JSON.stringify(this.listaAtivos());
+        const dadosNovosStr = JSON.stringify(dadosNovos);
+
+        // SÓ atualiza o Signal se houver mudança real nos dados
+        if (dadosAtuaisStr !== dadosNovosStr) {
+          console.log('🔄 Mudança detectada! Atualizando dashboard...');
+          this.listaAtivos.set(dadosNovos);
+        }
+      },
       error: (err) => console.error('Erro ao carregar ativos:', err)
     });
   }
