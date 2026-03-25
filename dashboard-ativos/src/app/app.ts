@@ -1,7 +1,8 @@
-import { Component, signal, OnInit, inject, OnDestroy, computed, effect, untracked } from '@angular/core';
+import { Component, signal, OnInit, inject, OnDestroy, computed, effect, untracked, viewChild, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AtivoService, Ativo } from './services/ativo';
-//import { RouterOutlet } from '@angular/router';
+import { Chart, registerables } from 'chart.js';
+Chart.register(...registerables);
 
 @Component({
   selector: 'app-root',
@@ -14,6 +15,8 @@ export class App implements OnInit, OnDestroy {
   private services = inject(AtivoService);
   public listaAtivos = signal<Ativo[]>([]);
   private intervalId: any;
+  @ViewChild('cpuChart') chartCanvas!: ElementRef;
+  private chart: Chart | undefined;
 
   // Signal para controle manual do "X"
   public exibirAlertaManual = signal(true);
@@ -31,20 +34,57 @@ export class App implements OnInit, OnDestroy {
   );
 
   constructor() {
+    // Esse effect observa a listaAtivos. Se ela mudar (via polling), o gráfico atualiza!
     effect(() => {
-      const quantidadeAtual = this.ativosCriticos().length;
-
-      // SÓ reseta o alerta se a quantidade de servidores críticos AUMENTAR
-      if (quantidadeAtual > this.quantidadeCriticosAnterior) {
-        // Usamos untracked para evitar ciclos infinitos de signal
-        untracked(() => {
-          this.exibirAlertaManual.set(true);
-        });
+      const dados = this.listaAtivos();
+      if (dados.length > 0) {
+        this.updateChart(dados);
       }
-      
-      // Atualiza a contagem para a próxima verificação
-      this.quantidadeCriticosAnterior = quantidadeAtual;
     });
+  }
+
+  updateChart(ativos: Ativo[]) {
+    const labels = ativos.map(a => a.nome_ativo);
+    const valores = ativos.map(a => a.carga_cpu);
+
+    // Destrói o gráfico anterior antes de recriar
+    if (this.chart) {
+      this.chart.destroy();
+    }
+
+    if (this.chartCanvas) {
+      this.chart = new Chart(this.chartCanvas.nativeElement, {
+        type: 'bar', 
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Carga de CPU (%)',
+            data: valores,
+            backgroundColor: ativos.map(a => a.carga_cpu > 80 ? '#e74c3c' : '#3498db'),
+            borderRadius: 6,
+            borderWidth: 0 
+          }]
+        },
+        options: {
+          indexAxis: 'y', 
+          responsive: true,
+          maintainAspectRatio: false, 
+          scales: {
+            x: { 
+              beginAtZero: true, 
+              max: 100, 
+              grid: { display: false }
+            },
+            y: {
+              grid: { display: false },
+              ticks: {
+                font: { weight: 'bold' }
+              }
+            }
+          },
+        }
+      });
+    }
   }
 
   fecharNotificacao() {
