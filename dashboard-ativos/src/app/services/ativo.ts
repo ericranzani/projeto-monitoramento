@@ -24,5 +24,9 @@ export class AtivoService {
   deletarAtivo(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }
+
+  atualizarAtivo(id: number, ativo: Ativo): Observable<Ativo> {
+    return this.http.put<Ativo>(`${this.apiUrl}/${id}`, ativo);
+  }
 }
 

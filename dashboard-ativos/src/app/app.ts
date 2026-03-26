@@ -11,6 +11,7 @@ Chart.register(...registerables);
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
+
 export class App implements OnInit, OnDestroy {
   private services = inject(AtivoService);
   public listaAtivos = signal<Ativo[]>([]);
@@ -21,11 +22,9 @@ export class App implements OnInit, OnDestroy {
   // Signal para controle manual do "X"
   public exibirAlertaManual = signal(true);
 
-  private quantidadeCriticosAnterior = 0;
-
   // Signal Computado: Sempre que listaAtivos mudar, ele filtra os críticos (> 90%)
   public ativosCriticos = computed(() => 
-    this.listaAtivos().filter(a => a.carga_cpu >= 90)
+    this.listaAtivos().filter(a => a.carga_cpu >= 90 || a.status.toLowerCase() === 'alerta')
   );
 
   // Signal final que decide se mostra ou não (Lógica + Controle Manual)
@@ -37,9 +36,11 @@ export class App implements OnInit, OnDestroy {
     // Esse effect observa a listaAtivos. Se ela mudar (via polling), o gráfico atualiza!
     effect(() => {
       const dados = this.listaAtivos();
-      if (dados.length > 0) {
-        this.updateChart(dados);
-      }
+      untracked(() => {
+        if (dados.length > 0) {
+          this.updateChart(dados);
+        }
+      });
     });
   }
 
@@ -101,9 +102,8 @@ export class App implements OnInit, OnDestroy {
 
   // Limpa o intervalo quando o componente for destruído
   ngOnDestroy(): void {
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-    }
+    if (this.intervalId) {clearInterval(this.intervalId);}
+    if (this.chart) { this.chart.destroy(); }
   }
  
   carregarDados() {
@@ -115,21 +115,27 @@ export class App implements OnInit, OnDestroy {
 
         // SÓ atualiza o Signal se houver mudança real nos dados
         if (dadosAtuaisStr !== dadosNovosStr) {
-          console.log('🔄 Mudança detectada! Atualizando dashboard...');
           this.listaAtivos.set(dadosNovos);
+          // Se novos críticos surgirem, resetamos o alerta manual para mostrar a notificação
+          if (dadosNovos.some(a => a.carga_cpu >= 90)) {
+             this.exibirAlertaManual.set(true);
+          }
         }
       },
       error: (err) => console.error('Erro ao carregar ativos:', err)
     });
   }
 
-  deletarAtivo(id: number) {
-  if (confirm('Tem certeza que deseja excluir este ativo?')) {
+  deletarAtivo(id: number | undefined) {
+    if (!id) return; // Segurança contra IDs nulos
+    
+    if (confirm('Tem certeza que deseja remover este ativo do monitoramento?')) {
       this.services.deletarAtivo(id).subscribe({
         next: () => {
-          this.carregarDados();
+          console.log(`Ativo ${id} removido.`);
+          this.carregarDados(); // Recarrega para limpar o gráfico e a lista
         },
-        error: (err) => console.error('Erro ao deletar:', err)
+        error: (err) => alert('Erro ao excluir: Verifique a conexão com o servidor.')
       });
     }
   }
