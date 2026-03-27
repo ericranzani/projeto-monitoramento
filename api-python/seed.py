@@ -1,6 +1,6 @@
 from sqlalchemy.orm import sessionmaker
 from database import SessionLocal, engine
-import models
+from app import models
 from datetime import datetime
 import random
 

@@ -16,6 +16,10 @@
         </div>
       }
 
+      <button class="btn-add" (click)="iniciarNovoAtivo()">
+        ➕ Adicionar Servidor
+      </button>
+
       <button class="btn-refresh" (click)="carregarDados()">
         🔄 Sincronizar Agora
       </button>
@@ -80,13 +84,12 @@
     <div class="modal-overlay" (click)="cancelarEdicao()">
       <div class="modal-content" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h2>Editar Ativo</h2>
+          <h2>{{ ativoSelecionado.id ? 'Editar Ativo' : 'Novo Servidor' }}</h2>
           <button class="btn-close-modal" (click)="cancelarEdicao()">×</button>
         </div>
 
         <div class="modal-body">
           <div class="edit-group">
-            <label>Nome do Servidor</label>
             <input [(ngModel)]="ativoSelecionado.nome_ativo" type="text" class="input-modal">
           </div>
 

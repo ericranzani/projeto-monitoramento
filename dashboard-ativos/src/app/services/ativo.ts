@@ -21,6 +21,10 @@ export class AtivoService {
     return this.http.get<Ativo[]>(this.apiUrl);
   }
 
+  criarAtivo(ativo: Ativo): Observable<Ativo> {
+    return this.http.post<Ativo>(this.apiUrl, ativo);
+  }
+
   deletarAtivo(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }

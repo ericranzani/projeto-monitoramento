@@ -129,6 +129,15 @@ export class App implements OnInit, OnDestroy {
     });
   }
 
+  iniciarNovoAtivo() {
+    this.idEmEdicao.set(0);
+    this.ativoSelecionado = { 
+      nome_ativo: '', 
+      status: 'Online', 
+      carga_cpu: 0 
+    } as Ativo;
+  }
+
   iniciarEdicao(ativo: Ativo) {
     this.idEmEdicao.set(ativo.id!);
     // Criamos uma cópia para não editar o objeto original da lista antes de salvar
@@ -141,13 +150,31 @@ export class App implements OnInit, OnDestroy {
     } else if (ativo.status === 'Alerta' && ativo.carga_cpu < 90) {
       ativo.status = 'Online';
     }
-    this.services.atualizarAtivo(ativo.id!, ativo).subscribe({
-      next: () => {
-        this.idEmEdicao.set(null);
-        this.carregarDados();
-      },
-      error: (err) => alert('Erro ao salvar!')
-    });
+
+    // Lógica: Criar ou Atualizar?
+    if (ativo.id) {
+      // UPDATE (PUT)
+      this.services.atualizarAtivo(ativo.id, ativo).subscribe({
+        next: () => this.finalizarAcao(),
+        error: (err) => console.error(err)
+      });
+    } else {
+      // CREATE (POST)
+      const { id, ultima_atualizacao, ...novoAtivo } = ativo;
+      
+      this.services.criarAtivo(novoAtivo as Ativo).subscribe({
+        next: () => this.finalizarAcao(),
+        error: (err) => {
+          console.error('Erro detalhado:', err);
+          alert('Erro ao criar: Verifique o console.');
+        }
+      });
+    }
+  }
+
+  private finalizarAcao() {
+    this.idEmEdicao.set(null);
+    this.carregarDados();
   }
 
   cancelarEdicao() {

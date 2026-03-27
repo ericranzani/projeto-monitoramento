@@ -7,7 +7,7 @@ class AtivoSchema(BaseModel):
     nome_ativo: str
     status: str
     carga_cpu: int
-    ultima_atualizacao: datetime
+    ultima_atualizacao: Optional[datetime] = None
 
     class Config:
         from_attributes = True
