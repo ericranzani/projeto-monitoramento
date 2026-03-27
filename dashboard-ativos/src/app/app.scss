@@ -160,6 +160,28 @@
   }
 }
 
+.button-group {
+  display: flex;
+  flex-direction: row; 
+  gap: 4px;           
+  margin-top: 5px;     
+}
+
+.btn-update {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  opacity: 0.4;
+  transition: 0.2s;
+
+  &:hover {
+    opacity: 1;
+    color: #3498db;
+    transform: scale(1.1);
+  }
+}
+
 .btn-delete {
   background: transparent;
   border: none;
@@ -224,4 +246,79 @@
 @keyframes slideIn {
   from { top: -60px; opacity: 0; }
   to { top: 20px; opacity: 1; }
+}
+
+// 9. ESTILOS DO MODAL DE EDIÇÃO
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.6); // Escurece o fundo
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 3000; // Garante que fique sobre o gráfico e os cards
+  backdrop-filter: blur(4px); // Efeito de desfoque no fundo
+  animation: fadeIn 0.3s;
+}
+
+.modal-content {
+  background: white;
+  width: 90%;
+  max-width: 400px;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  animation: modalSpawn 0.3s ease-out;
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    h2 { margin: 0; color: #2c3e50; font-size: 1.3rem; }
+    .btn-close-modal { background: none; border: none; font-size: 2rem; cursor: pointer; color: #bdc3c7; }
+  }
+}
+
+
+.modal-body {
+  .edit-group {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    label { font-weight: bold; color: #34495e; font-size: 0.9rem; }
+    .input-modal {
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+      &:focus { border-color: #3498db; outline: none; }
+    }
+  }
+}
+
+.modal-actions {
+  display: flex;
+  gap: 15px;
+  margin-top: 25px;
+  button {
+    flex: 1;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .btn-cancel { background: #f1f2f6; color: #57606f; }
+  .btn-save-modal { background: #3498db; color: white; }
+  button:hover { filter: brightness(0.9); }
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes modalSpawn {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }

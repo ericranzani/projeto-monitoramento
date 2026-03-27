@@ -2,12 +2,13 @@ import { Component, signal, OnInit, inject, OnDestroy, computed, effect, untrack
 import { CommonModule } from '@angular/common';
 import { AtivoService, Ativo } from './services/ativo';
 import { Chart, registerables } from 'chart.js';
+import { FormsModule } from '@angular/forms';
 Chart.register(...registerables);
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule], // Necessário para usar *ngFor e Pipes de data
+  imports: [CommonModule, FormsModule], // Necessário para usar *ngFor e Pipes de data
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
@@ -15,6 +16,8 @@ Chart.register(...registerables);
 export class App implements OnInit, OnDestroy {
   private services = inject(AtivoService);
   public listaAtivos = signal<Ativo[]>([]);
+  public idEmEdicao = signal<number | null>(null);
+  public ativoSelecionado: Ativo = {} as Ativo;
   private intervalId: any;
   @ViewChild('cpuChart') chartCanvas!: ElementRef;
   private chart: Chart | undefined;
@@ -61,7 +64,7 @@ export class App implements OnInit, OnDestroy {
           datasets: [{
             label: 'Carga de CPU (%)',
             data: valores,
-            backgroundColor: ativos.map(a => a.carga_cpu > 80 ? '#e74c3c' : '#3498db'),
+            backgroundColor: ativos.map(a => a.carga_cpu > 90 ? '#e74c3c' : '#3498db'),
             borderRadius: 6,
             borderWidth: 0 
           }]
@@ -124,6 +127,32 @@ export class App implements OnInit, OnDestroy {
       },
       error: (err) => console.error('Erro ao carregar ativos:', err)
     });
+  }
+
+  iniciarEdicao(ativo: Ativo) {
+    this.idEmEdicao.set(ativo.id!);
+    // Criamos uma cópia para não editar o objeto original da lista antes de salvar
+    this.ativoSelecionado = { ...ativo };
+  }
+
+  salvarEdicao(ativo: Ativo) {
+    if (ativo.status !== 'Offline' && ativo.carga_cpu >= 90) {
+      ativo.status = 'Alerta';
+    } else if (ativo.status === 'Alerta' && ativo.carga_cpu < 90) {
+      ativo.status = 'Online';
+    }
+    this.services.atualizarAtivo(ativo.id!, ativo).subscribe({
+      next: () => {
+        this.idEmEdicao.set(null);
+        this.carregarDados();
+      },
+      error: (err) => alert('Erro ao salvar!')
+    });
+  }
+
+  cancelarEdicao() {
+    this.idEmEdicao.set(null);
+    this.carregarDados(); // Reverte mudanças visuais não salvas
   }
 
   deletarAtivo(id: number | undefined) {
