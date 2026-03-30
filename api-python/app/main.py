@@ -4,6 +4,7 @@ from app.database import engine
 from app import models
 from app.routes import ativos
 
+
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Monitoramento de Ativos API")
