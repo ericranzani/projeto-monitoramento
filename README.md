@@ -55,7 +55,6 @@ python seed.py
 uvicorn app.main:app --reload
 
 ### 2. Frontend (Angular)
-```bash
 # Entre na pasta do Dashboard
 cd dashboard-ativos
 
