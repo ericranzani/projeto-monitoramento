@@ -5,41 +5,73 @@ Projeto "build to learn" Full-Stack focado em demonstrar a integração de tecno
 
 ## 🏗️ Arquitetura do Projeto
 
-O fluxo de dados simula um ambiente industrial/corporativo de missão crítica:
+O sistema simula um ambiente de monitoramento de missão crítica (como um Data Center ou Planta Industrial) onde a baixa latência é fundamental:
 
-* 📡 **Ingestão (Delphi):** Envio de telemetria via REST/JSON com tratamento de tipos.
-* 🧠 **Core (Python/FastAPI):** API de alta performance, validação rigorosa (Pydantic) e persistência de dados.
-* 🗄️ **Database (SQLite/SQLAlchemy):** Persistência relacional para histórico de ativos.
-* 💻 **Dashboard (Angular 18):** Interface reativa utilizando **Signals** e **Computed State** para monitoramento em tempo real sem refresh manual.
+* 📡 **Ingestão (Delphi CE):** Envio de telemetria via REST/JSON com tratamento de tipos e formatação de data ISO8601.
+* 🧠 **Core (Python/FastAPI):** API Assíncrona de alta performance com validação rigorosa de dados via Pydantic.
+* ⚡ **Real-Time (WebSockets):** Implementação de um `ConnectionManager` no Backend para realizar o "push" de notificações instantâneas para os clientes conectados.
+* 💻 **Dashboard (Angular 18+):** Interface reativa de última geração utilizando **Signals**, **Computed State** e **Chart.js** para visualização de dados sem necessidade de refresh manual.
+* 🗄️ **Database (SQLite/SQLAlchemy):** Persistência relacional robusta utilizando mapeamento objeto-relacional (ORM).
 
-
-
-## 🛠️ Tecnologias e Funcionalidades
+## 🛠️ Tecnologias e Diferenciais Técnicos
 
 | Camada | Tecnologia | Destaques Técnicos |
 | :--- | :--- | :--- |
-| **Backend** | `Python / FastAPI` | SQLAlchemy ORM, CORS Middleware, Pydantic Schemas. |
-| **Frontend** | `Angular 18` | Signals, Computed Signals, Effects, Modern Control Flow (@for/@if). |
-| **Desktop** | `Delphi CE` | TJSONObject, REST Client, ISO8601 Date Formatting. |
-| **Banco** | `SQLite` | Persistência local eficiente para prototipagem rápida. |
+| **Backend** | `Python / FastAPI` | **WebSockets**, Programação Assíncrona, SQLAlchemy ORM, Pydantic Schemas. |
+| **Frontend** | `Angular 18` | **Signals**, **WebSockets Nativo**, **Chart.js**, Modern Control Flow (`@if`/`@for`). |
+| **Desktop** | `Delphi CE` | TJSONObject, REST Client, Ingestão de telemetria Desktop. |
+| **Testes** | `Python Requests` | Scripts de automação para validação de fluxo CRUD e Regras de Negócio. |
 
 ## 🌟 Funcionalidades Implementadas
 
-* ✅ **Real-time Polling:** O Dashboard Angular sincroniza automaticamente com a API a cada 5 segundos.
-* ✅ **Sistema de Alertas Inteligente:** Notificações flutuantes (Toasts) que identificam automaticamente cargas de CPU críticas (>90%).
-* ✅ **Smart UX:** Alertas que permitem fechamento manual e só reaparecem se novos incidentes forem detectados, evitando poluição visual.
-* ✅ **Estilização Dinâmica:** Cards e Badges que reagem visualmente ao status (Online/Offline) e nível de carga.
+* ✅ **Real-Time Engine:** Comunicação bidirecional via **WebSockets**, eliminando o Polling e garantindo que o Dashboard reflita o banco de dados instantaneamente.
+* ✅ **CRUD Web Completo:** Interface administrativa para criar, editar e excluir ativos diretamente pelo navegador.
+* ✅ **Data Viz:** Gráfico de barras dinâmico que atualiza cores e valores em tempo real conforme a carga de CPU dos ativos muda.
+* ✅ **Sistema de Alertas Inteligente:** Notificações reativas que identificam cargas críticas (>90%) e permitem gestão manual do alerta pelo usuário.
+* ✅ **DevTools:** Inclui scripts de `seed.py` para população rápida do banco e `test_api.py` para validação de estresse e lógica da API.
 
-## 🎯 Roadmap de Melhorias (Build to Learn)
+## 📈 Evolução do Projeto (Roadmap Concluído)
 
-- [ ] **Clean Architecture:** Refatoração das camadas para separação total de regras de negócio e infraestrutura.
-- [ ] **Gráficos:** Implementar Chart.js para visualização histórica de uso de CPU.
-- [ ] **CRUD:** Finalizar funções de edição e exclusão de ativos pela interface Web.
-- [ ] **Docker:** Containerização completa do ecossistema.
+- [x] **WebSockets:** Implementação de mensageria para atualizações em tempo real.
+- [x] **Gráficos:** Integração com Chart.js para monitoramento visual de performance.
+- [x] **CRUD Completo:** Gestão total de ativos via Dashboard Web.
+- [x] **Estilização Reativa:** UI adaptativa que altera estados visuais baseada na telemetria.
+- [ ] **Docker:** (Próximo passo) Containerização de todo o ecossistema para deploy facilitado.
 
+## 🚀 Como Executar
 
-## 🚀 Como rodar
+### 1. Backend (Python)
+```bash
+# Entre na pasta da API
+cd api-python
 
-1. **API:** `uvicorn main:app --reload` na pasta `/api-python`.
-2. **Web:** `ng serve` na pasta `/dashboard-ativos`.
-3. **Delphi:** Abrir o projeto no Delphi CE e compilar (F9).
+# Instale as dependências (requer uvicorn[standard] para WebSockets)
+pip install -r requirements.txt
+
+# Popule o banco de dados inicial
+python seed.py
+
+# Inicie o servidor
+uvicorn app.main:app --reload
+
+### 2. Frontend (Angular)
+```bash
+# Entre na pasta do Dashboard
+cd dashboard-ativos
+
+# Instale as dependências do Node
+npm install
+
+# Inicie o servidor de desenvolvimento
+ng serve
+
+### 3. Desktop (Delphi)
+Abra o projeto .dproj no Delphi Community Edition.
+
+Certifique-se de que a URL da API aponta para http://127.0.0.1:8000.
+
+Compile e execute (F9).
+
+### 4. Teste automatizados 
+# Execute o script de teste para validar o fluxo e ver o WebSocket em ação
+python test_api.py
