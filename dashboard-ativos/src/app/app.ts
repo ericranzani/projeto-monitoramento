@@ -1,42 +1,41 @@
-import { Component, signal, OnInit, inject, OnDestroy, computed, effect, untracked, viewChild, ElementRef, ViewChild } from '@angular/core';
+import { Component, signal, OnInit, inject, OnDestroy, computed, effect, untracked, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AtivoService, Ativo } from './services/ativo';
 import { Chart, registerables } from 'chart.js';
 import { FormsModule } from '@angular/forms';
+
 Chart.register(...registerables);
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, FormsModule], // Necessário para usar *ngFor e Pipes de data
+  imports: [CommonModule, FormsModule],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
-
 export class App implements OnInit, OnDestroy {
   private services = inject(AtivoService);
   public listaAtivos = signal<Ativo[]>([]);
   public idEmEdicao = signal<number | null>(null);
   public ativoSelecionado: Ativo = {} as Ativo;
-  private intervalId: any;
+  
+  // WebSocket: Substituímos o intervalId pelo objeto do Socket
+  private socket: WebSocket | undefined;
+
   @ViewChild('cpuChart') chartCanvas!: ElementRef;
   private chart: Chart | undefined;
 
-  // Signal para controle manual do "X"
   public exibirAlertaManual = signal(true);
 
-  // Signal Computado: Sempre que listaAtivos mudar, ele filtra os críticos (> 90%)
   public ativosCriticos = computed(() => 
     this.listaAtivos().filter(a => a.carga_cpu >= 90 || a.status.toLowerCase() === 'alerta')
   );
 
-  // Signal final que decide se mostra ou não (Lógica + Controle Manual)
   public mostrarNotificacao = computed(() => 
     this.ativosCriticos().length > 0 && this.exibirAlertaManual()
   );
 
   constructor() {
-    // Esse effect observa a listaAtivos. Se ela mudar (via polling), o gráfico atualiza!
     effect(() => {
       const dados = this.listaAtivos();
       untracked(() => {
@@ -47,14 +46,62 @@ export class App implements OnInit, OnDestroy {
     });
   }
 
+  // --- LÓGICA DO WEBSOCKET ---
+  conectarWebSocket() {
+    // Conecta no endereço que definimos no Python (prefixo /ativos + rota /ws)
+    this.socket = new WebSocket('ws://127.0.0.1:8000/ativos/ws');
+
+    this.socket.onmessage = (event) => {
+      // Se o Python enviar a string "atualizar", nós buscamos os dados novos
+      if (event.data === 'atualizar') {
+        console.log('⚡ Mudança detectada no servidor! Atualizando dados...');
+        this.carregarDados();
+      }
+    };
+
+    this.socket.onclose = () => {
+      console.warn('⚠️ WebSocket desconectado. Tentando reconectar em 3s...');
+      setTimeout(() => this.conectarWebSocket(), 3000);
+    };
+
+    this.socket.onerror = (error) => {
+      console.error('❌ Erro no WebSocket:', error);
+    };
+  }
+
+  ngOnInit(): void {
+    this.carregarDados();
+    this.conectarWebSocket();
+  }
+
+  ngOnDestroy(): void {
+    // Fecha o socket quando sair da página para não gastar memória
+    if (this.socket) {
+      this.socket.close();
+    }
+    if (this.chart) { 
+      this.chart.destroy(); 
+    }
+  }
+
+  carregarDados() {
+    this.services.listarAtivos().subscribe({
+      next: (dadosNovos) => {
+        this.listaAtivos.set(dadosNovos);
+        if (dadosNovos.some(a => a.carga_cpu >= 90)) {
+          this.exibirAlertaManual.set(true);
+        }
+      },
+      error: (err) => console.error('Erro ao carregar ativos:', err)
+    });
+  }
+
+  // --- GRÁFICO ---
   updateChart(ativos: Ativo[]) {
     const labels = ativos.map(a => a.nome_ativo);
     const valores = ativos.map(a => a.carga_cpu);
 
-    // Destrói o gráfico anterior antes de recriar
-    if (this.chart) {
-      this.chart.destroy();
-    }
+    if (this.chart) { this.chart.destroy(); }
 
     if (this.chartCanvas) {
       this.chart = new Chart(this.chartCanvas.nativeElement, {
@@ -66,7 +113,6 @@ export class App implements OnInit, OnDestroy {
             data: valores,
             backgroundColor: ativos.map(a => a.carga_cpu > 90 ? '#e74c3c' : '#3498db'),
             borderRadius: 6,
-            borderWidth: 0 
           }]
         },
         options: {
@@ -74,125 +120,60 @@ export class App implements OnInit, OnDestroy {
           responsive: true,
           maintainAspectRatio: false, 
           scales: {
-            x: { 
-              beginAtZero: true, 
-              max: 100, 
-              grid: { display: false }
-            },
-            y: {
-              grid: { display: false },
-              ticks: {
-                font: { weight: 'bold' }
-              }
-            }
+            x: { beginAtZero: true, max: 100, grid: { display: false } },
+            y: { grid: { display: false }, ticks: { font: { weight: 'bold' } } }
           },
         }
       });
     }
   }
 
-  fecharNotificacao() {
-    this.exibirAlertaManual.set(false);
-  }
-
-  ngOnInit(): void {
-    this.carregarDados();
-    // Atualiza os dados a cada 5 segundos
-    this.intervalId = setInterval(() => {
-      this.carregarDados();
-    }, 5000);
-  }
-
-  // Limpa o intervalo quando o componente for destruído
-  ngOnDestroy(): void {
-    if (this.intervalId) {clearInterval(this.intervalId);}
-    if (this.chart) { this.chart.destroy(); }
-  }
- 
-  carregarDados() {
-    this.services.listarAtivos().subscribe({
-      next: (dadosNovos) => {
-        // Converte ambos para string para uma comparação rápida e simples
-        const dadosAtuaisStr = JSON.stringify(this.listaAtivos());
-        const dadosNovosStr = JSON.stringify(dadosNovos);
-
-        // SÓ atualiza o Signal se houver mudança real nos dados
-        if (dadosAtuaisStr !== dadosNovosStr) {
-          this.listaAtivos.set(dadosNovos);
-          // Se novos críticos surgirem, resetamos o alerta manual para mostrar a notificação
-          if (dadosNovos.some(a => a.carga_cpu >= 90)) {
-             this.exibirAlertaManual.set(true);
-          }
-        }
-      },
-      error: (err) => console.error('Erro ao carregar ativos:', err)
-    });
-  }
-
+  // --- AÇÕES DO CRUD ---
   iniciarNovoAtivo() {
     this.idEmEdicao.set(0);
-    this.ativoSelecionado = { 
-      nome_ativo: '', 
-      status: 'Online', 
-      carga_cpu: 0 
-    } as Ativo;
+    this.ativoSelecionado = { nome_ativo: '', status: 'Online', carga_cpu: 0 } as Ativo;
   }
 
   iniciarEdicao(ativo: Ativo) {
     this.idEmEdicao.set(ativo.id!);
-    // Criamos uma cópia para não editar o objeto original da lista antes de salvar
     this.ativoSelecionado = { ...ativo };
   }
 
   salvarEdicao(ativo: Ativo) {
+    // A regra de alerta agora é reforçada pelo Backend, mas mantemos aqui para UX rápida
     if (ativo.status !== 'Offline' && ativo.carga_cpu >= 90) {
       ativo.status = 'Alerta';
     } else if (ativo.status === 'Alerta' && ativo.carga_cpu < 90) {
       ativo.status = 'Online';
     }
 
-    // Lógica: Criar ou Atualizar?
     if (ativo.id) {
-      // UPDATE (PUT)
       this.services.atualizarAtivo(ativo.id, ativo).subscribe({
-        next: () => this.finalizarAcao(),
+        next: () => this.idEmEdicao.set(null), // O WebSocket chamará o carregarDados()
         error: (err) => console.error(err)
       });
     } else {
-      // CREATE (POST)
       const { id, ultima_atualizacao, ...novoAtivo } = ativo;
-      
       this.services.criarAtivo(novoAtivo as Ativo).subscribe({
-        next: () => this.finalizarAcao(),
-        error: (err) => {
-          console.error('Erro detalhado:', err);
-          alert('Erro ao criar: Verifique o console.');
-        }
+        next: () => this.idEmEdicao.set(null),
+        error: (err) => alert('Erro ao criar: Verifique o console.')
       });
     }
-  }
-
-  private finalizarAcao() {
-    this.idEmEdicao.set(null);
-    this.carregarDados();
   }
 
   cancelarEdicao() {
     this.idEmEdicao.set(null);
-    this.carregarDados(); // Reverte mudanças visuais não salvas
+  }
+
+  fecharNotificacao() {
+    this.exibirAlertaManual.set(false);
   }
 
   deletarAtivo(id: number | undefined) {
-    if (!id) return; // Segurança contra IDs nulos
-    
-    if (confirm('Tem certeza que deseja remover este ativo do monitoramento?')) {
-      this.services.deletarAtivo(id).subscribe({
-        next: () => {
-          console.log(`Ativo ${id} removido.`);
-          this.carregarDados(); // Recarrega para limpar o gráfico e a lista
-        },
-        error: (err) => alert('Erro ao excluir: Verifique a conexão com o servidor.')
-      });
-    }
+    if (!id || !confirm('Deseja remover este ativo?')) return;
+    this.services.deletarAtivo(id).subscribe({
+      next: () => console.log('Removido'),
+      error: (err) => alert('Erro ao excluir')
+    });
   }
 }
