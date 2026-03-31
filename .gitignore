@@ -29,7 +29,16 @@ env/
 venv/
 ENV/
 .pytest_cache/
+.tox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+*.results
 *.db
+*.sqlite3
+*.db-journal
+*.db-wal
 *.pyc
 instance/
 
@@ -51,3 +60,7 @@ yarn-error.log*
 *.log
 tmp/
 temp/
+.DS_Store
+Thumbs.db
+desktop.ini
+.history/
