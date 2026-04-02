@@ -1,5 +1,5 @@
 
-## 🚀 Monitoramento de Ativos: Delphi + Python + Angular
+## 🚀 Monitoramento de Ativos: Delphi + Python + Angular (Real-Time & Dockerized)
 
 Projeto "build to learn" Full-Stack focado em demonstrar a integração de tecnologias de diferentes ecossistemas (Desktop, Web e API) através de uma arquitetura robusta e escalável.
 
@@ -11,6 +11,7 @@ O sistema simula um ambiente de monitoramento de missão crítica (como um Data 
 * 🧠 **Core (Python/FastAPI):** API Assíncrona de alta performance com validação rigorosa de dados via Pydantic.
 * ⚡ **Real-Time (WebSockets):** Implementação de um `ConnectionManager` no Backend para realizar o "push" de notificações instantâneas para os clientes conectados.
 * 💻 **Dashboard (Angular 18+):** Interface reativa de última geração utilizando **Signals**, **Computed State** e **Chart.js** para visualização de dados sem necessidade de refresh manual.
+* 🐳 **Containerização (Docker):** Todo o ecossistema Web/API isolado em containers para garantir que o projeto rode em qualquer ambiente sem conflitos de dependências.
 * 🗄️ **Database (SQLite/SQLAlchemy):** Persistência relacional robusta utilizando mapeamento objeto-relacional (ORM).
 
 ## 🛠️ Tecnologias e Diferenciais Técnicos
@@ -36,7 +37,7 @@ O sistema simula um ambiente de monitoramento de missão crítica (como um Data 
 - [x] **Gráficos:** Integração com Chart.js para monitoramento visual de performance.
 - [x] **CRUD Completo:** Gestão total de ativos via Dashboard Web.
 - [x] **Estilização Reativa:** UI adaptativa que altera estados visuais baseada na telemetria.
-- [ ] **Docker:** (Próximo passo) Containerização de todo o ecossistema para deploy facilitado.
+- [x] **Docker:** Containerização completa do ecossistema para deploy facilitado.
 
 ## 🚀 Como Executar
 
