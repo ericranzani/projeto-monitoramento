@@ -54,8 +54,10 @@ python seed.py
 
 # Inicie o servidor
 uvicorn app.main:app --reload
+```
 
 ### 2. Frontend (Angular)
+```bash
 # Entre na pasta do Dashboard
 cd dashboard-ativos
 
@@ -64,14 +66,29 @@ npm install
 
 # Inicie o servidor de desenvolvimento
 ng serve
+```
 
 ### 3. Desktop (Delphi)
+```bash
 Abra o projeto .dproj no Delphi Community Edition.
 
 Certifique-se de que a URL da API aponta para http://127.0.0.1:8000.
 
 Compile e execute (F9).
+```
 
 ### 4. Teste automatizados 
+```bash
 # Execute o script de teste para validar o fluxo e ver o WebSocket em ação
 python test_api.py
+```
+
+### 5. Via Docker
+```bash
+### 1. Pré-requisitos
+* Docker Desktop instalado e rodando.
+
+### 2. Rodando o Ecossistema Web (API + Dashboard)
+Na raiz do projeto, execute:
+docker-compose up --build
+```
