@@ -89,6 +89,6 @@ python test_api.py
 * Docker Desktop instalado e rodando.
 
 ### 2. Rodando o Ecossistema Web (API + Dashboard)
-Na raiz do projeto, execute:
+### Na raiz do projeto, execute:
 docker-compose up --build
 ```
