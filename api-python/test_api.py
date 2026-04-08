@@ -20,7 +20,6 @@ def testar_fluxo_api():
     
     if response.status_code == 200:
         print("✅ Sucesso: Ativo criado!")
-        # O ID vem do banco de dados agora
         ativo_id = response.json().get('id')
     elif response.status_code == 400:
         print(f"⚠️ Aviso: {response.json().get('detail')} (Pulando criação...)")
