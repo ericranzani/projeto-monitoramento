@@ -54,13 +54,11 @@ export class App implements OnInit, OnDestroy {
     this.socket.onmessage = (event) => {
       // Se o Python enviar a string "atualizar", nós buscamos os dados novos
       if (event.data === 'atualizar') {
-        console.log('⚡ Mudança detectada no servidor! Atualizando dados...');
         this.carregarDados();
       }
     };
 
     this.socket.onclose = () => {
-      console.warn('⚠️ WebSocket desconectado. Tentando reconectar em 3s...');
       setTimeout(() => this.conectarWebSocket(), 3000);
     };
 

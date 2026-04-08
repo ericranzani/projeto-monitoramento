@@ -9,7 +9,7 @@ from app.websocket import manager
 router = APIRouter(prefix="/ativos", tags=["Ativos"])
 
 # --- ROTA DO WEBSOCKET ---
-# Importante: Mantemos sem o Depends(get_db) para evitar conflitos de Runtime
+# Mantemos sem o Depends(get_db) para evitar conflitos de Runtime
 @router.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
